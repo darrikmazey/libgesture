@@ -11,8 +11,8 @@ int main(int argc, char **argv)
 	cv::Mat rgbMat(cv::Size(640,480), CV_8UC3, cv::Scalar(0));
 	cv::Mat ownMat(cv::Size(640,480), CV_8UC3, cv::Scalar(0));
 
-	Freenect::Freenect<LGFreenectDevice> freenect;
-	LGFreenectDevice &device = freenect.createDevice(0);
+	Freenect::Freenect freenect;
+	LGFreenectDevice &device = freenect.createDevice<LGFreenectDevice>(0);
 
 	cv::namedWindow("rgb", CV_WINDOW_AUTOSIZE);
 	cv::namedWindow("depth", CV_WINDOW_AUTOSIZE);
@@ -25,6 +25,11 @@ int main(int argc, char **argv)
 		device.getDepth(depthMat);
 
 		char k = cvWaitKey(5);
+		if (k == 27) {
+			cvDestroyWindow("rgb");
+			cvDestroyWindow("depth");
+			break;
+		}
 
 		cv::imshow("rgb", rgbMat);
 		depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
@@ -33,5 +38,6 @@ int main(int argc, char **argv)
 
 	device.stopVideo();
 	device.stopDepth();
+	freenect.deleteDevice(0);
 	return(0);
 }
