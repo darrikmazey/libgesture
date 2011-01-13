@@ -17,6 +17,7 @@ class DepthImage : public LGImage
 
 		DepthImage greyscaleHeatMap();
 		RGBImage heatMap();
+		RGBImage diff(DepthImage &other);
 
 		int depthAt(int x, int y);
 		int planeAt(int x, int y);

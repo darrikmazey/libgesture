@@ -56,6 +56,37 @@ void DepthImage::filter(int p, int d)
 	}
 }
 
+RGBImage DepthImage::diff(DepthImage &other)
+{
+	cv::Mat_<cv::Vec3b> newMat(m_pdMat->size().height, m_pdMat->size().width, cv::Vec3b(0,0,0));
+	for (int y = 0; y < 480; y++) {
+		for (int x = 0; x < 640; x++) {
+			int p1 = planeAt(x,y);
+			int p2 = other.planeAt(x,y);
+			int d1 = depthAt(x,y);
+			int d2 = other.depthAt(x,y);
+			int n1 = p1 * 255 + d1;
+			int n2 = p2 * 255 + d2;
+			int n = n1 - n2;
+			if (p1 < 0 || p1 > 5 || p2 < 0 || p2 > 5) {
+				n = 0;
+			}
+			if (n > 255) {
+				n = 255;
+			}
+			if (n < -255) {
+				n = -255;
+			}
+			if (n > 0) {
+				newMat(y,x) = cv::Vec3b(n, 0, 0);
+			} else if (n < 0) {
+				newMat(y,x) = cv::Vec3b(0, 0, 0 - n);
+			}
+		}
+	}
+	return(RGBImage(newMat));
+}
+
 RGBImage DepthImage::heatMap()
 {
 	cv::Mat_<cv::Vec3b> newMat(m_pdMat->size().height, m_pdMat->size().width, cv::Vec3b(0,0,0));

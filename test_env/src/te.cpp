@@ -17,11 +17,16 @@ int main(int argc, char **argv)
 	int filter_depth = 255;
 	int filter_plane = 4;
 
+	bool haveLastDepth = false;
+	DepthImage *lastDepth;
+
 	cv::Mat depthMat(cv::Size(640,480), CV_16UC1);
 	cv::Mat depthf(cv::Size(640,480), CV_8UC1);
 	cv::Mat rgbMat(cv::Size(640, 480), CV_8UC3);
 
 	cv::Scalar cursor_color(0,0,0);
+	cv::Scalar cursor_color_diff(255,255,255);
+
 	while (char k = cvWaitKey(10)) {
 		if (k == 27) {
 			break;
@@ -104,11 +109,26 @@ int main(int argc, char **argv)
 
 		rgbImage.drawCrosshairs(rgb_cursor.x, rgb_cursor.y, cursor_color, 2);
 		cv::imshow("rgb", *(rgbImage.cvMat()));
+		cvMoveWindow("rgb", 0, 0);
 		
 		depthImage.filter(filter_plane, filter_depth);
 		RGBImage nDepthImage = depthImage.heatMap();
 		nDepthImage.drawCrosshairs(d_cursor.x, d_cursor.y, cursor_color, 2);
 		cv::imshow("depth", *(nDepthImage.cvMat()));
+		cvMoveWindow("depth", 640, 0);
+
+		if (haveLastDepth) {
+			RGBImage diffImage = depthImage.diff(*lastDepth);
+			diffImage.drawCrosshairs(d_cursor.x, d_cursor.y, cursor_color_diff, 2);
+			DepthImage *old_last_depth = lastDepth;
+			lastDepth = new DepthImage(*(depthImage.cvMat()));
+			delete(old_last_depth);
+			cv::imshow("diff", *(diffImage.cvMat()));
+			cvMoveWindow("diff", 1280, 0);
+		} else {
+			lastDepth = new DepthImage(*(depthImage.cvMat()));
+			haveLastDepth = true;
+		}
 	}
 
 	delete(ctx);
