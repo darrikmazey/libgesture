@@ -2,6 +2,9 @@
 #include "mutex.h"
 #include "lgfreenectdevice.h"
 #include "gesturecontext.h"
+#include "rgbimage.h"
+#include "depthimage.h"
+#include "lgimage.h"
 
 #ifndef DARMA_LIBGESTURE_H
 #define DARMA_LIBGESTURE_H

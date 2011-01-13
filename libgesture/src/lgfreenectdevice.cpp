@@ -16,24 +16,26 @@ void LGFreenectDevice::VideoCallback(void* _rgb, uint32_t timestamp)
 {
 	static int frame = 0;
 	frame++;
-	std::cout << "RGB callback (frame " << frame << ")" << std::endl;
-	m_rgb_mutex.lock();
+	//std::cout << "RGB callback (frame " << frame << ")" << std::endl;
+	//m_rgb_mutex.lock();
 	uint8_t* rgb = static_cast<uint8_t*>(_rgb);
-	rgbMat.data = rgb;
+	std::copy(rgb, rgb+getVideoBufferSize(), m_buffer_rgb.begin());
+	rgbMat.data = (uchar *) &m_buffer_rgb.front();
 	m_new_rgb_frame = true;
-	m_rgb_mutex.unlock();
+	//m_rgb_mutex.unlock();
 }
 
 void LGFreenectDevice::DepthCallback(void* _depth, uint32_t timestamp)
 {
 	static int frame = 0;
 	frame++;
-	std::cout << "Depth callback (frame " << frame << ")" << std::endl;
-	m_depth_mutex.lock();
+	//std::cout << "Depth callback (frame " << frame << ")" << std::endl;
+	//m_depth_mutex.lock();
 	uint16_t* depth = static_cast<uint16_t*>(_depth);
-	depthMat.data = (uchar*) depth;
+	std::copy(depth, depth+getDepthBufferSize(), m_buffer_depth.begin());
+	depthMat.data = (uchar*) &m_buffer_depth.front();
 	m_new_depth_frame = true;
-	m_depth_mutex.unlock();
+	//m_depth_mutex.unlock();
 }
 
 bool LGFreenectDevice::getVideo(cv::Mat& output)
