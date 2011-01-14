@@ -1,9 +1,10 @@
 
 #include "lgfreenectdevice.h"
+#include <iostream>
 
 LGFreenectDevice::LGFreenectDevice(freenect_context *_ctx, int _index)
-	: Freenect::FreenectDevice(_ctx, _index), m_buffer_depth(FREENECT_DEPTH_11BIT_SIZE),m_buffer_rgb(FREENECT_VIDEO_RGB_SIZE), m_gamma(2048), m_new_rgb_frame(false), m_new_depth_frame(false),
-	depthMat(cv::Size(640,480),CV_16UC1), rgbMat(cv::Size(640,480),CV_8UC3,cv::Scalar(0)), ownMat(cv::Size(640,480),CV_8UC3,cv::Scalar(0))
+	: Freenect::FreenectDevice(_ctx, _index), m_buffer_depth(640*480*1),m_buffer_rgb(FREENECT_VIDEO_RGB_SIZE), m_gamma(2048), m_new_rgb_frame(false), m_new_depth_frame(false),
+	depthMat(cv::Size(640,480),0), rgbMat(cv::Size(640,480),cv::Vec3b(0,0,0))
 {
 	for( unsigned int i = 0 ; i < 2048 ; i++) {
 		float v = i/2048.0;
@@ -23,6 +24,7 @@ void LGFreenectDevice::VideoCallback(void* _rgb, uint32_t timestamp)
 	rgbMat.data = (uchar *) &m_buffer_rgb.front();
 	m_new_rgb_frame = true;
 	//m_rgb_mutex.unlock();
+	//std::cout << "end callback" << std::endl;
 }
 
 void LGFreenectDevice::DepthCallback(void* _depth, uint32_t timestamp)
@@ -32,10 +34,11 @@ void LGFreenectDevice::DepthCallback(void* _depth, uint32_t timestamp)
 	//std::cout << "Depth callback (frame " << frame << ")" << std::endl;
 	//m_depth_mutex.lock();
 	uint16_t* depth = static_cast<uint16_t*>(_depth);
-	std::copy(depth, depth+getDepthBufferSize(), m_buffer_depth.begin());
+	std::copy(depth, depth+(640*480*1), m_buffer_depth.begin());
 	depthMat.data = (uchar*) &m_buffer_depth.front();
 	m_new_depth_frame = true;
 	//m_depth_mutex.unlock();
+	//std::cout << "end callback" << std::endl;
 }
 
 bool LGFreenectDevice::getVideo(cv::Mat& output)

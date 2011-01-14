@@ -1,56 +1,56 @@
 
 #include "depthimage.h"
+#include "rgbimage.h"
 #include <iostream>
 
-DepthImage::DepthImage() :
-	LGImage()
+DepthImage::DepthImage()
 {
-	m_pdFilled = false;
+	m_mat = 0;
+	setupGamma();
 }
 
-DepthImage::DepthImage(cv::Mat &mat) :
-	LGImage(mat)
+DepthImage::DepthImage(cv::Mat_<cv::Vec2b> &mat)
 {
-	m_pdFilled = false;
-	fillPD();
+	std::cout << "DepthImage::DepthImage(2b)" << std::endl;
+	m_mat = new cv::Mat_<cv::Vec2b>(mat);
+	mat.copyTo(*m_mat);
+	setupGamma();
+}
+
+DepthImage::DepthImage(cv::Mat_<uint16_t> &mat)
+{
+	setupGamma();
+	m_mat = new cv::Mat_<cv::Vec2b>(mat);
+	for (int y = 0; y < 480; y++) {
+		for (int x = 0; x < 640; x++) {
+			(*m_mat)(y,x) = cv::Vec2b(m_gamma[mat(y,x)] >> 8, m_gamma[mat(y,x)] % 256);
+		}
+	}
 }
 
 DepthImage::~DepthImage()
 {
-	delete(m_pdMat);
+	delete(m_mat);
 }
 
-DepthImage DepthImage::convert(int type, double alpha, double beta)
+cv::Mat_<cv::Vec2b> *DepthImage::cvMat()
 {
-	cv::Mat newMat(m_mat->size(), type);
-	m_mat->convertTo(newMat, type, alpha, beta);
-	return(DepthImage(newMat));
+	return(m_mat);
 }
 
+/*
 DepthImage DepthImage::greyscaleHeatMap()
 {
 	return(convert(CV_8UC1, 255.0/2048.0));
 }
+*/
 
-void DepthImage::fillPD()
-{
-	if (!m_pdFilled) {
-		m_pdMat = new cv::Mat_<cv::Vec2b>(m_mat->size().height, m_mat->size().width, cv::Vec2b(35,0));
-		for (int y = 0; y < 480; y++) {
-			for (int x = 0; x < 640; x++) {
-				(*m_pdMat)(y,x) = cv::Vec2b(planeAt(x,y), depthAt(x,y));
-			}
-		}
-		m_pdFilled = true;
-	}
-}
-
-void DepthImage::filter(int p, int d)
+void DepthImage::filter(int up, int ud, int lp, int ld)
 {
 	for (int y = 0; y < 480; y++) {
 		for (int x = 0; x < 640; x++) {
-			if (planeAt(x,y) > p || (planeAt(x,y) == p && depthAt(x,y) > d)) {
-				(*m_pdMat)(y,x) = cv::Vec2b(35,0);
+			if ((planeAt(x,y) > up || (planeAt(x,y) == up && depthAt(x,y) > ud))||(planeAt(x,y) < lp || (planeAt(x,y) == lp && depthAt(x,y) < ld))) {
+				(*m_mat)(y,x) = cv::Vec2b(35,0);
 			}
 		}
 	}
@@ -58,7 +58,7 @@ void DepthImage::filter(int p, int d)
 
 RGBImage DepthImage::diff(DepthImage &other)
 {
-	cv::Mat_<cv::Vec3b> newMat(m_pdMat->size().height, m_pdMat->size().width, cv::Vec3b(0,0,0));
+	cv::Mat_<cv::Vec3b> newMat(m_mat->size().height, m_mat->size().width, cv::Vec3b(0,0,0));
 	for (int y = 0; y < 480; y++) {
 		for (int x = 0; x < 640; x++) {
 			int p1 = planeAt(x,y);
@@ -89,7 +89,7 @@ RGBImage DepthImage::diff(DepthImage &other)
 
 RGBImage DepthImage::heatMap()
 {
-	cv::Mat_<cv::Vec3b> newMat(m_pdMat->size().height, m_pdMat->size().width, cv::Vec3b(0,0,0));
+	cv::Mat_<cv::Vec3b> newMat(m_mat->size().height, m_mat->size().width, cv::Vec3b(0,0,0));
 	for (int y = 0; y < 480; y++) {
 		for (int x = 0; x < 640; x++) {
 			int p = planeAt(x, y);
@@ -124,21 +124,21 @@ RGBImage DepthImage::heatMap()
 
 int DepthImage::depthAt(int x, int y)
 {
-	if (m_pdFilled) {
-		return((*m_pdMat)(y,x)[1]);
-	} else {
-		int n = (*cvMat()).at<uint16_t>(y, x);
-		return(m_gamma[n] % 256);
-	}
+	return((*m_mat)(y,x)[1]);
 }
 
 int DepthImage::planeAt(int x, int y)
 {
-	if (m_pdFilled) {
-		return((*m_pdMat)(y,x)[0]);
-	} else {
-		int n = (*cvMat()).at<uint16_t>(y, x);
-		return(m_gamma[n] >> 8);
+	return((*m_mat)(y,x)[0]);
+}
+
+void DepthImage::setupGamma()
+{
+	for (int i = 0; i < 2048; i++)
+	{
+		float v = i/2048.0;
+		v = powf(v, 3) * 6;
+		m_gamma[i] = v * 6 * 256;
 	}
 }
 

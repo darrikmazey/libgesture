@@ -4,6 +4,27 @@
 #include "cv.h"
 #include "highgui.h"
 #include <iostream>
+#include <vector>
+
+CvMemStorage *storage = 0;
+CvHaarClassifierCascade *cascade = 0;
+
+FaceList *detect_face(GreyscaleImage &image)
+{
+	cvClearMemStorage(storage);
+	IplImage iplGrey(*(image.cvMat()));
+	FaceList *fl = new FaceList();
+	CvSeq *faces = cvHaarDetectObjects(&iplGrey, cascade, storage, 1.2, 1, CV_HAAR_DO_CANNY_PRUNING, cv::Size(30,30));
+	if (faces) {
+		for (int i = 0; i < faces->total; i++) {
+			CvRect *r = (CvRect*)cvGetSeqElem(faces,i);
+			cv::Rect nr(*r);
+			Face *f = new Face(nr);
+			fl->insert(f);
+		}
+	}
+	return(fl);
+}
 
 int main(int argc, char **argv)
 {
@@ -20,12 +41,23 @@ int main(int argc, char **argv)
 	bool haveLastDepth = false;
 	DepthImage *lastDepth;
 
-	cv::Mat depthMat(cv::Size(640,480), CV_16UC1);
-	cv::Mat depthf(cv::Size(640,480), CV_8UC1);
-	cv::Mat rgbMat(cv::Size(640, 480), CV_8UC3);
+	FaceList *face_list = new FaceList();
+
+	cv::Point adjustment(16, -32);
+
+	cv::Mat_<uint16_t> depthMat(cv::Size(640,480));
+	cv::Mat_<cv::Vec3b> depthf(cv::Size(640,480));
+	cv::Mat_<cv::Vec3b> rgbMat(cv::Size(640, 480));
 
 	cv::Scalar cursor_color(0,0,0);
 	cv::Scalar cursor_color_diff(255,255,255);
+	cv::Scalar color_red(0,0,255);
+	cv::Scalar color_white(255,255,255);
+	cv::Scalar color_blue(255,0,0);
+	cv::Scalar color_grey(130,130,130);
+	
+	storage = cvCreateMemStorage(0);
+	cascade = (CvHaarClassifierCascade*) cvLoad("../haarcascade_frontalface_alt.xml", 0, 0, 0);
 
 	while (char k = cvWaitKey(10)) {
 		if (k == 27) {
@@ -97,25 +129,66 @@ int main(int argc, char **argv)
 				break;
 		}
 
-		//std::cout << "diff: (" << (d_cursor.x - rgb_cursor.x) << "," << (d_cursor.y - rgb_cursor.y) << ")" << std::endl;
-		std::cout << "filter [" << filter_plane << " : " << filter_depth << "]" << std::endl;
-
 		dev->getVideo(rgbMat);
 		dev->getDepth(depthMat);
 		RGBImage rgbImage(rgbMat);
 		DepthImage depthImage(depthMat);
 		
-		//std::cout << "[" << depthImage.planeAt(d_cursor.x, d_cursor.y) << " : " << depthImage.depthAt(d_cursor.x, d_cursor.y) << "]" << std::endl;
+		// face detection
+		GreyscaleImage greyImage = rgbImage.greyscale();
+
+		FaceList *faces = detect_face(greyImage);
+		face_list->insert(*faces);
+
+		Face *f = face_list->best();
+		int c = 0;
+		if (f && !faces->contains(f)) {
+			face_list->miss(f);
+		}
+
+		faces->clear();
+		delete(faces);
+
+		if (f) {
+			cv::rectangle(*(rgbImage.cvMat()), f->topLeft(), f->bottomRight(), color_white, 2);
+			cv::circle(*(rgbImage.cvMat()), f->center(), 3, color_white, 1);
+
+			cv::rectangle(*(greyImage.cvMat()), f->topLeft(), f->bottomRight(), color_white, 2);
+			cv::circle(*(greyImage.cvMat()), f->center(), 3, color_white, 1);
+
+
+			int d = depthImage.depthAt((f->center() + adjustment).x, (f->center() + adjustment).y);
+			int p = depthImage.planeAt((f->center() + adjustment).x, (f->center() + adjustment).y);
+			filter_depth = d + 100;
+			filter_plane = p;
+			if (filter_depth > 255) {
+				filter_depth = filter_depth % 255;
+				filter_plane += 1;
+			}
+
+			std::cout << "FACE: @(" << f->center().x << "," << f->center().y << ") weight (" << face_list->weight(f) << ") p [" << p << "] d [" << d << "]" << std::endl;
+		} else {
+			std::cout << "no face detected" << std::endl;
+		}
+		depthImage.filter(filter_plane, filter_depth);
+		RGBImage nDepthImage = depthImage.heatMap();
+
+		if (f) {
+			cv::rectangle(*(nDepthImage.cvMat()), f->topLeft() + adjustment, f->bottomRight() + adjustment, color_white, 2);
+			cv::circle(*(nDepthImage.cvMat()), f->center() + adjustment, 3, color_white, 1);
+		}
+		// end face detection
 
 		rgbImage.drawCrosshairs(rgb_cursor.x, rgb_cursor.y, cursor_color, 2);
 		cv::imshow("rgb", *(rgbImage.cvMat()));
 		cvMoveWindow("rgb", 0, 0);
-		
-		depthImage.filter(filter_plane, filter_depth);
-		RGBImage nDepthImage = depthImage.heatMap();
+
 		nDepthImage.drawCrosshairs(d_cursor.x, d_cursor.y, cursor_color, 2);
 		cv::imshow("depth", *(nDepthImage.cvMat()));
 		cvMoveWindow("depth", 640, 0);
+
+		cv::imshow("grey", *(greyImage.cvMat()));
+		cvMoveWindow("grey", 1920, 0);
 
 		if (haveLastDepth) {
 			RGBImage diffImage = depthImage.diff(*lastDepth);
@@ -129,6 +202,7 @@ int main(int argc, char **argv)
 			lastDepth = new DepthImage(*(depthImage.cvMat()));
 			haveLastDepth = true;
 		}
+
 	}
 
 	delete(ctx);

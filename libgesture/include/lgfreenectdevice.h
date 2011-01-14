@@ -26,9 +26,8 @@ class LGFreenectDevice : public Freenect::FreenectDevice
 		std::vector<uint16_t> m_buffer_depth;
 		std::vector<uint8_t> m_buffer_rgb;
 		std::vector<uint16_t> m_gamma;
-		cv::Mat depthMat;
-		cv::Mat rgbMat;
-		cv::Mat ownMat;
+		cv::Mat_<cv::Vec2b> depthMat;
+		cv::Mat_<cv::Vec3b> rgbMat;
 		Mutex m_rgb_mutex;
 		Mutex m_depth_mutex;
 		bool m_new_rgb_frame;

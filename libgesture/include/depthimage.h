@@ -2,32 +2,37 @@
 #ifndef DARMA_DEPTHIMAGE_H
 #define DARMA_DEPTHIMAGE_H
 
-#include "lgimage.h"
-#include "rgbimage.h"
 #include <cv.h>
 
-class DepthImage : public LGImage
+class RGBImage;
+
+class DepthImage
 {
 	public:
 		DepthImage();
-		DepthImage(cv::Mat &mat);
+		DepthImage(cv::Mat_<cv::Vec2b> &mat);
+		DepthImage(cv::Mat_<uint16_t> &mat);
 		~DepthImage();
 
-		DepthImage convert(int type, double alpha = 1, double beta = 0);
-
+		/*
 		DepthImage greyscaleHeatMap();
-		RGBImage heatMap();
+		*/
+
+		void filter(int up, int ud, int lp = 0, int ld = 0);
+
 		RGBImage diff(DepthImage &other);
+		RGBImage heatMap();
 
 		int depthAt(int x, int y);
 		int planeAt(int x, int y);
 
-		void filter(int p, int d = 255);
+		cv::Mat_<cv::Vec2b> *cvMat();
 
 	private:
-		void fillPD();
-		cv::Mat_<cv::Vec2b> *m_pdMat;
-		bool m_pdFilled;
+		void setupGamma();
+
+		cv::Mat_<cv::Vec2b> *m_mat;
+		uint16_t m_gamma[2048];
 };
 
 #endif // DARMA_DEPTHIMAGE_H

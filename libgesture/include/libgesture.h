@@ -4,7 +4,9 @@
 #include "gesturecontext.h"
 #include "rgbimage.h"
 #include "depthimage.h"
-#include "lgimage.h"
+#include "greyscaleimage.h"
+#include "face.h"
+#include "facelist.h"
 
 #ifndef DARMA_LIBGESTURE_H
 #define DARMA_LIBGESTURE_H
