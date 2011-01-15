@@ -2,7 +2,7 @@
 #ifndef DARMA_GREYSCALE_IMAGE_H
 #define DARMA_GREYSCALE_IMAGE_H
 
-#include <cv.h>
+#include <opencv.hpp>
 
 //class GreyscaleImage;
 //class DepthImage;

@@ -51,14 +51,14 @@ void RGBImage::drawCrosshairs(int x, int y, cv::Scalar &color, int thickness, in
 	line(*m_mat, cv::Point(x, y-5), cv::Point(x, y+5), color, thickness, lineType, shift);
 }
 
-//void RGBImage::mask(RGBImage &mask)
-//{
-//	for (int y = 0; y < 480; y++) {
-//		for (int x = 0; x < 640; x++) {
-//			if ((*(mask.cvMat()))(y,x) == cv::Vec3b(0,0,0)) {
-//				(*(cvMat()))(y,x) = cv::Vec3b(0,0,0);
-//			}
-//		}
-//	}
-//}
-//
+void RGBImage::mask(RGBImage &mask)
+{
+	for (int y = 0; y < 480; y++) {
+		for (int x = 0; x < 640; x++) {
+			if ((*(mask.cvMat()))(y,x) == cv::Vec3b(0,0,0)) {
+				(*(cvMat()))(y,x) = cv::Vec3b(0,0,0);
+			}
+		}
+	}
+}
+

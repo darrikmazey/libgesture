@@ -1,6 +1,6 @@
 SET(BUILD_SHARED_LIBS ON)
 
-include_directories(./include	/usr/include/opencv)
+include_directories(./include	/usr/local/include/opencv2)
 
 add_library (gesture
 	src/mutex.cpp
@@ -12,6 +12,7 @@ add_library (gesture
 	src/greyscaleimage.cpp
 	src/face.cpp
 	src/facelist.cpp
+	src/pollingthread.cpp
 )
 
 target_link_libraries(gesture freenect)

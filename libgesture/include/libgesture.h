@@ -7,6 +7,7 @@
 #include "greyscaleimage.h"
 #include "face.h"
 #include "facelist.h"
+#include "pollingthread.h"
 
 #ifndef DARMA_LIBGESTURE_H
 #define DARMA_LIBGESTURE_H

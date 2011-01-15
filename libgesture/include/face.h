@@ -2,7 +2,7 @@
 #ifndef DARMA_FACE_H
 #define DARMA_FACE_H
 
-#include <cv.h>
+#include <opencv.hpp>
 
 class Face {
 	public:

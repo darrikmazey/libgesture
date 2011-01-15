@@ -4,6 +4,7 @@
 
 #include <libfreenect.hpp>
 #include "lgfreenectdevice.h"
+#include "pollingthread.h"
 
 class GestureContext
 {
@@ -16,6 +17,7 @@ class GestureContext
 	private:
 		Freenect::Freenect *m_freenect;
 		LGFreenectDevice *m_device;
+		PollingThread *m_polling_thread;
 };
 
 #endif // DARMA_GESTURE_CONTEXT_H

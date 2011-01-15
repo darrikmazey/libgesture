@@ -4,7 +4,7 @@
 
 #include <libfreenect.hpp>
 #include "mutex.h"
-#include <cv.h>
+#include <opencv.hpp>
 #include <iostream>
 
 class LGFreenectDevice : public Freenect::FreenectDevice
