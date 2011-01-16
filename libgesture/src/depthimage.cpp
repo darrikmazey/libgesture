@@ -111,7 +111,8 @@ RGBImage DepthImage::heatMap()
 			}
 		}
 	}
-	return(RGBImage(newMat));
+	RGBImage img(newMat);
+	return(img);
 }
 
 int DepthImage::depthAt(int x, int y)

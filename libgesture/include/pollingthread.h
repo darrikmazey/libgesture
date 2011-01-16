@@ -21,8 +21,6 @@ class PollingThread
 	protected:
 		volatile bool m_stop;
 		pthread_t m_thread;
-		RGBImage *m_last_rgb_image;
-		DepthImage *m_last_depth_image;
 };
 
 #endif // DARMA_POLLING_THREAD_H

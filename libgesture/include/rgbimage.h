@@ -12,6 +12,7 @@ class RGBImage
 	public:
 		RGBImage();
 		RGBImage(cv::Mat_<cv::Vec3b> &mat);
+		RGBImage(RGBImage &other);
 		~RGBImage();
 
 		GreyscaleImage greyscale();

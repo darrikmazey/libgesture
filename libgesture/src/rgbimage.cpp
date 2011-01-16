@@ -16,6 +16,13 @@ RGBImage::RGBImage(cv::Mat_<cv::Vec3b> &mat)
 	setupGamma();
 }
 
+RGBImage::RGBImage(RGBImage &other)
+{
+	m_mat = new cv::Mat_<cv::Vec3b>(*(other.cvMat()));
+	other.cvMat()->copyTo(*m_mat);
+	setupGamma();
+}
+
 RGBImage::~RGBImage()
 {
 	delete(m_mat);
