@@ -10,6 +10,7 @@ GestureContext::GestureContext() :
 	m_device = &m_freenect->createDevice<LGFreenectDevice>(0);
 	m_device->startVideo();
 	m_device->startDepth();
+	m_face_list = new FaceList();
 	m_polling_thread = new PollingThread();
 	m_polling_thread->start();
 }
@@ -21,6 +22,9 @@ GestureContext::~GestureContext()
 	m_device->stopDepth();
 	m_device->stopVideo();
 	m_device = 0;
+	if (m_face_list) {
+		delete(m_face_list);
+	}
 	delete(m_freenect);
 	if (m_last_rgb_image) {
 		delete(m_last_rgb_image);
@@ -78,7 +82,7 @@ void GestureContext::newRGBImage(RGBImage *image)
 		delete(m_last_rgb_image);
 		m_last_rgb_image = 0;
 	}
-	m_last_rgb_image = new RGBImage(*image);
+	m_last_rgb_image = image;
 	m_new_rgb_image = true;
 	m_rgb_mutex.unlock();
 }
@@ -90,7 +94,7 @@ void GestureContext::newDepthImage(DepthImage *image)
 		delete(m_last_depth_image);
 		m_last_depth_image = 0;
 	}
-	m_last_depth_image = new DepthImage(*image);
+	m_last_depth_image = image;
 	m_new_depth_image = true;
 	m_depth_mutex.unlock();
 }

@@ -6,6 +6,7 @@
 #include "lgfreenectdevice.h"
 #include "pollingthread.h"
 #include "mutex.h"
+#include "facelist.h"
 
 class GestureContext
 {
@@ -31,6 +32,8 @@ class GestureContext
 		DepthImage *m_last_depth_image;
 		volatile bool m_new_rgb_image;
 		volatile bool m_new_depth_image;
+
+		FaceList *m_face_list;
 };
 
 #endif // DARMA_GESTURE_CONTEXT_H
