@@ -11,8 +11,9 @@ class RGBImage
 {
 	public:
 		RGBImage();
-		RGBImage(cv::Mat_<cv::Vec3b> &mat);
+		RGBImage(cv::Mat3b &mat);
 		RGBImage(RGBImage &other);
+		RGBImage(const RGBImage &other);
 		~RGBImage();
 
 		GreyscaleImage greyscale();
@@ -21,13 +22,13 @@ class RGBImage
 
 		void drawCrosshairs(int x, int y, cv::Scalar &color, int thickness = 1, int lineType = 8, int shift = 0);
 
-		cv::Mat_<cv::Vec3b> *cvMat();
+		cv::Mat3b *cvMat() const;
 	
 	protected:
 		void setupGamma();
 
 		uint16_t m_gamma[2048];
-		cv::Mat_<cv::Vec3b> *m_mat;
+		cv::Mat3b *m_mat;
 };
 
 #endif // DARMA_RGBIMAGE_H

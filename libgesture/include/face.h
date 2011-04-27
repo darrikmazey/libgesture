@@ -15,6 +15,8 @@ class Face {
 		int height();
 		cv::Point topLeft();
 		cv::Point bottomRight();
+		cv::Rect boundingRect();
+		cv::Rect detectionRect();
 		int weight();
 		void setWeight(int w);
 		void adjustCenter(cv::Point other_center);

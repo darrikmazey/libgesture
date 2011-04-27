@@ -9,16 +9,22 @@ RGBImage::RGBImage()
 	setupGamma();
 }
 
-RGBImage::RGBImage(cv::Mat_<cv::Vec3b> &mat)
+RGBImage::RGBImage(cv::Mat3b &mat)
 {
-	m_mat = new cv::Mat_<cv::Vec3b>(mat);
+	m_mat = new cv::Mat3b(mat);
 	mat.copyTo(*m_mat);
 	setupGamma();
 }
 
 RGBImage::RGBImage(RGBImage &other)
 {
-	m_mat = new cv::Mat_<cv::Vec3b>(*(other.cvMat()));
+	m_mat = new cv::Mat3b(other.cvMat()->clone());
+	setupGamma();
+}
+
+RGBImage::RGBImage(const RGBImage &other)
+{
+	m_mat = new cv::Mat3b(*(other.cvMat()));
 	other.cvMat()->copyTo(*m_mat);
 	setupGamma();
 }
@@ -28,7 +34,7 @@ RGBImage::~RGBImage()
 	delete(m_mat);
 }
 
-cv::Mat_<cv::Vec3b> *RGBImage::cvMat()
+cv::Mat3b *RGBImage::cvMat() const
 {
 	return(m_mat);
 }
@@ -45,7 +51,7 @@ void RGBImage::setupGamma()
 
 GreyscaleImage RGBImage::greyscale()
 {
-	cv::Mat_<uint8_t> grey(cvMat()->size(), 0);
+	cv::Mat1b grey(cvMat()->size(), 0);
 	IplImage iplGrey(grey);
 	IplImage iplThis(*(cvMat()));
 	cvCvtColor(&iplThis, &iplGrey, CV_BGR2GRAY);

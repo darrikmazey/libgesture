@@ -7,6 +7,7 @@
 #include "pollingthread.h"
 #include "mutex.h"
 #include "facelist.h"
+#include "facedetector.h"
 
 class GestureContext
 {
@@ -22,7 +23,14 @@ class GestureContext
 		void newRGBImage(RGBImage *image);
 		void newDepthImage(DepthImage *image);
 
+		Face *face();
+
+		RGBImage drawSkeleton();
+
 	private:
+		void postProcessRGB();
+		void postProcessDepth();
+
 		Freenect::Freenect *m_freenect;
 		LGFreenectDevice *m_device;
 		PollingThread *m_polling_thread;
@@ -34,6 +42,7 @@ class GestureContext
 		volatile bool m_new_depth_image;
 
 		FaceList *m_face_list;
+		FaceDetector *m_face_detector;
 };
 
 #endif // DARMA_GESTURE_CONTEXT_H

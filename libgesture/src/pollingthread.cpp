@@ -42,7 +42,7 @@ void PollingThread::threadfunc()
 		GestureContext *ctx = LibGesture::context();
 		if (ctx) {
 			//std::cout << "have context" << std::endl;
-			cv::Mat_<cv::Vec3b> rgbMat(640,480, cv::Vec3b(0,0,0));
+			cv::Mat3b rgbMat(640,480, cv::Vec3b(0,0,0));
 			cv::Mat_<uint16_t> depthMat(640,480, (uint16_t)0);
 			if (ctx->device()->getVideo(rgbMat)) {
 				RGBImage *rgb_image = new RGBImage(rgbMat);

@@ -44,6 +44,16 @@ cv::Point Face::bottomRight()
 	return(cv::Point(m_center.x + m_width/2, m_center.y + m_height/2));
 }
 
+cv::Rect Face::boundingRect()
+{
+	return(cv::Rect(topLeft(), bottomRight()));
+}
+
+cv::Rect Face::detectionRect()
+{
+	return(cv::Rect(cv::Point(topLeft().x - m_width/2, topLeft().y - m_height/2), cv::Point(bottomRight().x + m_width/2, bottomRight().y + m_height/2)));
+}
+
 int Face::weight()
 {
 	return(m_weight);
@@ -56,7 +66,8 @@ void Face::setWeight(int w)
 
 void Face::adjustCenter(cv::Point other_center)
 {
-	m_center = cv::Point((m_center.x + other_center.x)/2, (m_center.y + other_center.y)/2);
+	//m_center = cv::Point((m_center.x + other_center.x)/2, (m_center.y + other_center.y)/2);
+	m_center = other_center;
 }
 
 bool Face::contains(cv::Point &p)

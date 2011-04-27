@@ -21,7 +21,7 @@ void LGFreenectDevice::VideoCallback(void* _rgb, uint32_t timestamp)
 	m_rgb_mutex.lock();
 	uint8_t* rgb = static_cast<uint8_t*>(_rgb);
 	std::copy(rgb, rgb+getVideoBufferSize(), m_buffer_rgb.begin());
-	cv::Mat_<cv::Vec3b> nMat(rgbMat);
+	cv::Mat3b nMat(rgbMat);
 	nMat.data = (uchar *) &m_buffer_rgb.front();
 	nMat.copyTo(rgbMat);
 	m_new_rgb_frame = true;
@@ -37,7 +37,7 @@ void LGFreenectDevice::DepthCallback(void* _depth, uint32_t timestamp)
 	m_depth_mutex.lock();
 	uint16_t* depth = static_cast<uint16_t*>(_depth);
 	std::copy(depth, depth+(640*480*1), m_buffer_depth.begin());
-	cv::Mat_<cv::Vec2b> nMat(depthMat);
+	cv::Mat2b nMat(depthMat);
 	nMat.data = (uchar*) &m_buffer_depth.front();
 	nMat.copyTo(depthMat);
 	m_new_depth_frame = true;

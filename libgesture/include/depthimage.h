@@ -10,7 +10,7 @@ class DepthImage
 {
 	public:
 		DepthImage();
-		DepthImage(cv::Mat_<cv::Vec2b> &mat);
+		DepthImage(cv::Mat2b &mat);
 		DepthImage(cv::Mat_<uint16_t> &mat);
 		DepthImage(DepthImage &other);
 		~DepthImage();
@@ -24,16 +24,18 @@ class DepthImage
 		RGBImage heatMap();
 
 		int depthAt(int x, int y);
+		int depthAt(const cv::Point &p);
 		int planeAt(int x, int y);
+		int planeAt(const cv::Point &p);
 
 		int frame();
 
-		cv::Mat_<cv::Vec2b> *cvMat();
+		cv::Mat2b *cvMat();
 
 	private:
 		void setupGamma();
 
-		cv::Mat_<cv::Vec2b> *m_mat;
+		cv::Mat2b *m_mat;
 		uint16_t m_gamma[2048];
 		int m_frame;
 };
